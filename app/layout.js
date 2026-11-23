@@ -1,50 +1,92 @@
 'use client';
 
 import { useEffect } from 'react';
-import { translations, getBrowserLang } from '../lib/i18n';
+
+const DICT = {
+  ar: {
+    dir: 'rtl',
+    Logout: 'تسجيل الخروج',
+    Code: 'الرمز',
+    Available: 'الرصيد المتاح',
+    Pending: 'قيد الانتظار',
+    'Products Store': 'متجر المنتجات',
+    'Buy Now': 'اشترِ الآن',
+    'Referral Link': 'رابط الإحالة',
+    Copy: 'نسخ',
+    Copied: 'تم النسخ',
+    Commissions: 'العمولات',
+    Level: 'المستوى',
+    PENDING: 'معلق',
+    APPROVED: 'مقبول',
+    'Order paid! Commission added.': 'تم دفع الطلب! تمت إضافة العمولة.',
+  },
+  fr: {
+    dir: 'ltr',
+    Logout: 'Déconnexion',
+    Code: 'Code',
+    Available: 'Disponible',
+    Pending: 'En attente',
+    'Products Store': 'Boutique de produits',
+    'Buy Now': 'Acheter',
+    'Referral Link': 'Lien de parrainage',
+    Copy: 'Copier',
+    Copied: 'Copié',
+    Commissions: 'Commissions',
+    Level: 'Niveau',
+    PENDING: 'EN ATTENTE',
+    APPROVED: 'APPROUVÉ',
+    'Order paid! Commission added.': 'Commande payée ! Commission ajoutée.',
+  },
+  es: {
+    dir: 'ltr',
+    Logout: 'Cerrar sesión',
+    Code: 'Código',
+    Available: 'Disponible',
+    Pending: 'Pendiente',
+    'Products Store': 'Tienda de productos',
+    'Buy Now': 'Comprar ahora',
+    'Referral Link': 'Enlace de referencia',
+    Copy: 'Copiar',
+    Copied: 'Copiado',
+    Commissions: 'Comisiones',
+    Level: 'Nivel',
+    PENDING: 'PENDIENTE',
+    APPROVED: 'APROBADO',
+    'Order paid! Commission added.': '¡Pedido pagado! Comisión añadida.',
+  },
+};
 
 export default function RootLayout({ children }) {
   useEffect(() => {
-    const lang = getBrowserLang();
-    const dict = translations[lang] || translations.en;
+    const rawLang = (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
+    const langDict = DICT[rawLang];
 
-    // ضبط اتجاه الصفحة تلقائياً (يمين لليسار للعربية، ويسار لليمين لباقي اللغات)
-    document.documentElement.dir = dict.dir;
-    document.documentElement.lang = lang;
+    if (!langDict) return;
 
-    // دالة ترجمة النصوص في الصفحة تلقائياً
-    const translatePage = () => {
-      if (lang === 'en') return;
+    document.documentElement.dir = langDict.dir;
+    document.documentElement.lang = rawLang;
 
-      const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-      );
-
+    const translateDOM = () => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       let node;
       while ((node = walker.nextNode())) {
-        let text = node.nodeValue;
-        if (!text || !text.trim()) continue;
-
-        Object.keys(dict).forEach((key) => {
-          if (key === 'dir') return;
-          if (text.includes(key)) {
-            text = text.replace(new RegExp(key, 'g'), dict[key]);
+        let val = node.nodeValue;
+        if (!val || !val.trim()) continue;
+        for (const [enText, trText] of Object.entries(langDict)) {
+          if (enText === 'dir') continue;
+          if (val.includes(enText)) {
+            val = val.split(enText).join(trText);
           }
-        });
-
-        if (node.nodeValue !== text) {
-          node.nodeValue = text;
+        }
+        if (node.nodeValue !== val) {
+          node.nodeValue = val;
         }
       }
     };
 
-    // تشغيل الترجمة عند التحميل وعند أي تحديث في الصفحة
-    translatePage();
-    const observer = new MutationObserver(translatePage);
-    observer.observe(document.body, { childList: true, subtree: true });
+    translateDOM();
+    const observer = new MutationObserver(translateDOM);
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     return () => observer.disconnect();
   }, []);
