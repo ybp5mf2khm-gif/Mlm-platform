@@ -109,10 +109,27 @@ export default function RootLayout({ children }) {
   return (
     <html lang={lang}>
       <body>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', padding: '8px', background: '#f3f4f6' }}>
-          <button onClick={() => changeLanguage('ar')} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #ccc', background: lang === 'ar' ? '#2563eb' : '#fff', color: lang === 'ar' ? '#fff' : '#000' }}>العربية</button>
-          <button onClick={() => changeLanguage('fr')} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #ccc', background: lang === 'fr' ? '#2563eb' : '#fff', color: lang === 'fr' ? '#fff' : '#000' }}>Français</button>
-          <button onClick={() => changeLanguage('en')} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #ccc', background: lang === 'en' ? '#2563eb' : '#fff', color: lang === 'en' ? '#fff' : '#000' }}>English</button>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px', background: '#f3f4f6' }}>
+          <select
+            value={lang}
+            onChange={(e) => changeLanguage(e.target.value)}
+            aria-label="Language"
+            style={{
+              padding: '6px 14px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              background: '#ffffff',
+              color: '#111827',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="ar">🌐 العربية</option>
+            <option value="fr">🌐 Français</option>
+            <option value="en">🌐 English</option>
+          </select>
         </div>
         {children}
       </body>
