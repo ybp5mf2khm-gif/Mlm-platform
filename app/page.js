@@ -32,38 +32,52 @@ export default function Home() {
   const [payNetwork, setPayNetwork] = useState('TRC20');
   const [txHash, setTxHash] = useState('');
 
-  useEffect(() => {
+    useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2500);
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
     if (ref) { setSponsorCode(ref.toUpperCase()); setIsSignUp(true); }
-    checkUser();
+    checkUser().finally(() => clearTimeout(timer));
   }, []);
 
   async function checkUser() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) { setUser(session.user); await loadData(session.user.id); }
-    } finally { setLoading(false); }
+      if (session?.user) {
+        setUser(session.user);
+        setLoading(false);
+        await loadData(session.user.id);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function loadData(uid) {
-    const { data: u } = await supabase.from('users').select('*').eq('id', uid).maybeSingle();
-    if (u) setProfile(u);
-    const { data: w } = await supabase.from('wallets').select('*').eq('user_id', uid).maybeSingle();
-    if (w) setWallet(w);
-    const { data: cl } = await supabase.from('user_closure').select('depth, descendant_id').eq('ancestor_id', uid).gt('depth', 0).lte('depth', 3);
-    if (cl && cl.length > 0) {
-      const ids = cl.map((c) => c.descendant_id);
-      const { data: m } = await supabase.from('users').select('id, full_name').in('id', ids);
-      setTeam(cl.map((c) => ({ depth: c.depth, name: m?.find((x) => x.id === c.descendant_id)?.full_name || 'Member' })));
-    } else { setTeam([]); }
-    const { data: p } = await supabase.from('products').select('*').eq('is_active', true);
-    if (p) setProducts(p);
-    const { data: cm } = await supabase.from('commissions').select('*').eq('beneficiary_id', uid).order('created_at', { ascending: false });
-    if (cm) setCommissions(cm);
-    const { data: py } = await supabase.from('payouts').select('*').eq('user_id', uid).order('created_at', { ascending: false });
-    if (py) setPayouts(py);
+    try {
+      const { data: u } = await supabase.from('users').select('*').eq('id', uid).maybeSingle();
+      if (u) setProfile(u);
+      const { data: w } = await supabase.from('wallets').select('*').eq('user_id', uid).maybeSingle();
+      if (w) setWallet(w);
+      const { data: cl } = await supabase.from('user_closure').select('depth, descendant_id').eq('ancestor_id', uid).gt('depth', 0).lte('depth', 3);
+      if (cl && cl.length > 0) {
+        const ids = cl.map((c) => c.descendant_id);
+        const { data: m } = await supabase.from('users').select('id, full_name').in('id', ids);
+        setTeam(cl.map((c) => ({ depth: c.depth, name: m?.find((x) => x.id === c.descendant_id)?.full_name || 'Member' })));
+      } else { setTeam([]); }
+      const { data: p } = await supabase.from('products').select('*').eq('is_active', true);
+      if (p) setProducts(p);
+      const { data: cm } = await supabase.from('commissions').select('*').eq('beneficiary_id', uid).order('created_at', { ascending: false });
+      if (cm) setCommissions(cm);
+      const { data: py } = await supabase.from('payouts').select('*').eq('user_id', uid).order('created_at', { ascending: false });
+      if (py) setPayouts(py);
+    } catch (err) {
+      console.error(err);
+    }
   }
+
   async function confirmUsdtOrder(ev) {
     ev.preventDefault();
     if (!selectedProduct || buyingId) return;
