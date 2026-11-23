@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import AdminStats from '../../components/AdminStats';
 import AdminTables from '../../components/AdminTables';
 import AdminProducts from '../../components/AdminProducts';
+import AdminSettings from '../../components/AdminSettings';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -116,6 +117,7 @@ export default function AdminPage() {
           <button onClick={() => setActiveTab('users')} style={getTabStyle('users')}>المسوقين ({users.length})</button>
           <button onClick={() => setActiveTab('orders')} style={getTabStyle('orders')}>الطلبات ({orders.length})</button>
           <button onClick={() => setActiveTab('payouts')} style={getTabStyle('payouts')}>السحوبات ({pendingCount})</button>
+          <button onClick={() => setActiveTab('settings')} style={getTabStyle('settings')}>الإعدادات</button>
         </div>
 
         {activeTab === 'overview' && (
@@ -124,6 +126,10 @@ export default function AdminPage() {
 
         {activeTab === 'products' && (
           <AdminProducts products={products} onRefresh={loadData} />
+        )}
+
+        {activeTab === 'settings' && (
+          <AdminSettings />
         )}
 
         {(activeTab === 'users' || activeTab === 'orders' || activeTab === 'payouts') && (
