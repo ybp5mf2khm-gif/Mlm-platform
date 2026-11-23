@@ -65,7 +65,17 @@ export default function AdminPage() {
   }
 
   async function handleApproveOrder(id) {
-    await supabase.from('orders').update({ status: 'PAID' }).eq('id', id);
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: 'PAID', paid_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      alert('خطأ: ' + error.message);
+      return;
+    }
+
+    alert('تم تأكيد الدفع وتوزيع العمولات بنجاح!');
     loadData();
   }
 
