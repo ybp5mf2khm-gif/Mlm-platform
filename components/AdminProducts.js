@@ -15,11 +15,8 @@ export default function AdminProducts({ products, onRefresh }) {
     if (!name || !price) return;
     setSaving(true);
 
-    // تجهيز البيانات بناءً على الأعمدة الموجودة في جدولك
+    // تجهيز البيانات بناءً على الأعمدة الموجودة في جدولح
     const newProduct = {
-      name: name.trim(),
-      price: parseFloat(price),
-          const newProduct = {
       name: name.trim(),
       price: parseFloat(price),
       sku: 'PRD-' + Date.now(),
