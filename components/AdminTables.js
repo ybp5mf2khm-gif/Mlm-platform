@@ -7,7 +7,7 @@ export default function AdminTables({
   payouts,
   onToggleUser,
   onApproveOrder,
-  onApprovePayout,
+  onProcessPayout,
 }) {
   const boxStyle = {
     backgroundColor: '#ffffff',
@@ -100,29 +100,69 @@ export default function AdminTables({
           <thead>
             <tr>
               <th style={thStyle}>المسوق</th>
-              <th style={thStyle}>المبلغ</th>
+              <th style={thStyle}>المبلغ والمحفظة</th>
               <th style={thStyle}>الحالة</th>
               <th style={thStyle}>إجراء</th>
             </tr>
           </thead>
           <tbody>
-            {payouts.map((p) => (
-              <tr key={p.id}>
-                <td style={tdStyle}>{p.users?.full_name}</td>
-                <td style={{ ...tdStyle, fontWeight: 'bold', color: '#15803d' }}>{p.amount} MAD</td>
-                <td style={tdStyle}>{p.status}</td>
-                <td style={tdStyle}>
-                  {p.status === 'PENDING' && (
-                    <button
-                      onClick={() => onApprovePayout(p.id)}
-                      style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '12px' }}
-                    >
-                      موافقة
-                    </button>
-                  )}
-                </td>
+            {payouts.length === 0 ? (
+              <tr>
+                <td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: '#64748b' }}>لا توجد طلبات سحب حالياً</td>
               </tr>
-            ))}
+            ) : (
+              payouts.map((p) => {
+                const walletAddr = p.account_info?.wallet || '';
+                const network = p.account_info?.network || p.method || '';
+                return (
+                  <tr key={p.id}>
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: 'bold' }}>{p.users?.full_name || 'مسوق'}</div>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>{p.users?.email}</div>
+                    </td>
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: 'bold', color: '#15803d' }}>{p.amount} USDT</div>
+                      <div style={{ fontSize: '11px', color: '#2563eb', fontWeight: 'bold' }}>{network}</div>
+                      {walletAddr && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                          <span style={{ fontSize: '11px', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+                            {walletAddr.slice(0, 8)}...{walletAddr.slice(-6)}
+                          </span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(walletAddr);
+                              alert('تم نسخ عنوان المحفظة: ' + walletAddr);
+                            }}
+                            style={{ backgroundColor: '#e2e8f0', border: 'none', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', cursor: 'pointer' }}
+                          >
+                            نسخ
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    <td style={tdStyle}>{p.status}</td>
+                    <td style={tdStyle}>
+                      {p.status === 'PENDING' && (
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            onClick={() => onProcessPayout(p.id, 'PAID')}
+                            style={{ backgroundColor: '#16a34a', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}
+                          >
+                            تم التحويل
+                          </button>
+                          <button
+                            onClick={() => onProcessPayout(p.id, 'REJECTED')}
+                            style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}
+                          >
+                            رفض
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
