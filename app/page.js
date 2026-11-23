@@ -137,13 +137,7 @@ export default function Home() {
         e('div', { style: card }, e('small', null, 'Available'), e('h2', { style: { margin: '5px 0', color: '#2f855a' } }, wallet?.available_balance || '0.00')),
         e('div', { style: card }, e('small', null, 'Pending'), e('h2', { style: { margin: '5px 0', color: '#d69e2e' } }, wallet?.pending_balance || '0.00'))
       ),
-      e('div', { style: card },
-        e('h4', { style: { marginTop: 0 } }, 'Referral Link'),
-        e('div', { style: { display: 'flex', gap: 8 } },
-          e('input', { readOnly: true, value: refUrl, style: { ...inp, flex: 1 } }),
-          e('button', { onClick: () => { navigator.clipboard.writeText(refUrl); setMessage('Copied!'); }, style: btn }, 'Copy')
-        )
-      ),
+            e(ReferralCard, { refUrl, referralCode: profile?.referral_code, setMessage }),
       e('div', { style: card },
         e('h4', { style: { marginTop: 0 } }, 'Wallet History (' + transactions.length + ')'),
         transactions.length === 0
