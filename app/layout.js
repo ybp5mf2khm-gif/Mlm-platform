@@ -21,15 +21,18 @@ export default function RootLayout({ children }) {
           }
           #google_translate_element {
             position: fixed;
-            bottom: 10px;
-            left: 10px;
+            bottom: 12px;
+            left: 12px;
             z-index: 9999;
-            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           }
         `}</style>
       </head>
       <body>
-        {/* زر تغيير اللغة في أسفل الشاشة + التغيير التلقائي */}
+        {/* قائمة اختيار اللغة + الترجمة التلقائية */}
         <div id="google_translate_element"></div>
 
         {children}
