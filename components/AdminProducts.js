@@ -29,21 +29,6 @@ export default function AdminProducts({ products, onRefresh }) {
     onRefresh();
   }
 
-  async function handleAddProduct(e) {
-    e.preventDefault();
-    if (!name || !price) return;
-    setSaving(true);
-
-    await supabase.from('products').insert([
-      { name, price: parseFloat(price), is_active: true }
-    ]);
-
-    setName('');
-    setPrice('');
-    setSaving(false);
-    onRefresh();
-  }
-
   async function toggleProduct(id, currentStatus) {
     await supabase
       .from('products')
@@ -73,7 +58,6 @@ export default function AdminProducts({ products, onRefresh }) {
 
   return (
     <div>
-      {/* نموذج إضافة منتج جديد */}
       <form onSubmit={handleAddProduct} style={boxStyle}>
         <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#1e293b' }}>إضافة منتج جديد</h3>
         <input
@@ -110,7 +94,6 @@ export default function AdminProducts({ products, onRefresh }) {
         </button>
       </form>
 
-      {/* قائمة المنتجات الحالية */}
       <div style={{ ...boxStyle, padding: 0, overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
