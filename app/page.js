@@ -2,6 +2,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+// ضع عناوين محافظك لاستلام المدفوعات هنا:
+const ADMIN_WALLETS = {
+  TRC20: 'ضع_عنوان_محفظتك_TRC20_هنا',
+  BEP20: 'ضع_عنوان_محفظتك_BEP20_هنا',
+};
+
 export default function Home() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -9,6 +15,7 @@ export default function Home() {
   const [team, setTeam] = useState([]);
   const [products, setProducts] = useState([]);
   const [commissions, setCommissions] = useState([]);
+  const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState(null);
 
@@ -19,8 +26,15 @@ export default function Home() {
   const [sponsorCode, setSponsorCode] = useState('');
   const [message, setMessage] = useState('');
 
+  // حالات السحب بالـ USDT
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawNetwork, setWithdrawNetwork] = useState('TRC20');
   const [accountDetails, setAccountDetails] = useState('');
+
+  // حالات الدفع بالـ USDT عند الشراء
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [payNetwork, setPayNetwork] = useState('TRC20');
+  const [txHash, setTxHash] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -78,21 +92,30 @@ export default function Home() {
       .eq('beneficiary_id', uid)
       .order('created_at', { ascending: false });
     if (cm) setCommissions(cm);
+
+    // جلب سجل السحوبات إن وجد
+    const { data: py } = await supabase
+      .from('payouts')
+      .select('*')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false });
+    if (py) setPayouts(py);
   }
 
-  async function buy(prod) {
-    if (buyingId) return;
-    setBuyingId(prod.id);
+  // تأكيد الدفع بالـ USDT وإنشاء الطلب
+  async function confirmUsdtOrder(e) {
+    e.preventDefault();
+    if (!selectedProduct || buyingId) return;
+    setBuyingId(selectedProduct.id);
     setMessage('Processing...');
 
     const { data: ord, error: err } = await supabase
       .from('orders')
       .insert({
         buyer_id: user.id,
-        total_amount: prod.price,
-        total_pv: prod.pv,
-        status: 'PAID',
-        paid_at: new Date().toISOString()
+        total_amount: selectedProduct.price,
+        total_pv: selectedProduct.pv,
+        status: 'PENDING', // ينتظر تأكيدك بعد مراجعة التحويل
       })
       .select()
       .single();
@@ -105,13 +128,15 @@ export default function Home() {
 
     await supabase.from('order_items').insert({
       order_id: ord.id,
-      product_id: prod.id,
+      product_id: selectedProduct.id,
       quantity: 1,
-      unit_price: prod.price,
-      unit_pv: prod.pv
+      unit_price: selectedProduct.price,
+      unit_pv: selectedProduct.pv
     });
 
-    setMessage('Order paid! Commission added.');
+    setMessage('Payment submitted! Waiting for admin approval.');
+    setSelectedProduct(null);
+    setTxHash('');
     await loadData(user.id);
     setBuyingId(null);
   }
@@ -142,17 +167,30 @@ export default function Home() {
 
   async function handlePayout(e) {
     e.preventDefault();
+    const trimmedWallet = accountDetails.trim();
+
+    // التحقق من صحة عنوان محفظة USDT
+    const isValidTRC20 = withdrawNetwork === 'TRC20' && /^T[a-zA-Z0-9]{33}$/.test(trimmedWallet);
+    const isValidBEP20 = withdrawNetwork === 'BEP20' && /^0x[a-fA-F0-9]{40}$/.test(trimmedWallet);
+
+    if (!isValidTRC20 && !isValidBEP20) {
+      setMessage(`Error: Invalid ${withdrawNetwork} wallet address`);
+      return;
+    }
+
     setMessage('Sending request...');
     const { error } = await supabase.rpc('request_payout', {
       p_user_id: user.id,
       p_amount: parseFloat(withdrawAmount),
-      p_method: 'Bank',
-      p_account_info: { details: accountDetails }
+      p_method: `USDT (${withdrawNetwork})`,
+      p_account_info: { network: withdrawNetwork, wallet: trimmedWallet }
     });
+
     if (error) setMessage('Error: ' + error.message);
     else {
       setMessage('Payout requested!');
       setWithdrawAmount('');
+      setAccountDetails('');
       await loadData(user.id);
     }
   }
@@ -221,57 +259,110 @@ export default function Home() {
               <b>{p.name}</b>
               <div style={{ fontSize: 12, color: '#666' }}>{p.price} MAD | {p.pv} PV</div>
             </div>
-            <button onClick={() => buy(p)} disabled={buyingId === p.id} style={{ ...btn, background: '#38a169' }}>
-              {buyingId === p.id ? '...' : 'Buy Now'}
+            <button onClick={() => setSelectedProduct(p)} style={{ ...btn, background: '#38a169' }}>
+              Buy Now
             </button>
           </div>
         ))}
-      </div>
 
-      <div style={card}>
-        <h4 style={{ marginTop: 0 }}>Referral Link</h4>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input readOnly value={refUrl} style={{ ...inp, flex: 1 }} />
-          <button onClick={() => { navigator.clipboard.writeText(refUrl); setMessage('Copied!'); }} style={btn}>Copy</button>
-        </div>
-      </div>
+        {/* نافذة الدفع بالـ USDT عند اختيار منتج */}
+        {selectedProduct && (
+          <div style={{ marginTop: 14, padding: 14, background: '#f7fafc', borderRadius: 8, border: '1px solid #cbd5e0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <b>Pay with USDT: {selectedProduct.name}</b>
+              <button onClick={() => setSelectedProduct(null)} style={{ background: 'none', border: 'none', color: '#e53e3e', fontWeight: 'bold', cursor: 'pointer' }}>✕</button>
+            </div>
 
-      <div style={card}>
-        <h4 style={{ marginTop: 0 }}>Commissions ({commissions.length})</h4>
-        {commissions.map((c) => (
-          <div key={c.id} style={row}>
-            <span>Level {c.level} ({Number(c.rate) * 100}%)</span>
-            <b style={{ color: '#2f855a' }}>+{c.amount} ({c.status})</b>
-          </div>
-        ))}
-      </div>
+            <form onSubmit={confirmUsdtOrder} style={col}>
+              <select value={payNetwork} onChange={(e) => setPayNetwork(e.target.value)} style={inp}>
+                <option value="TRC20">Network: USDT (TRC20)</option>
+                <option value="BEP20">Network: USDT (BEP20)</option>
+              </select>
 
-      <div style={card}>
-        <h4 style={{ marginTop: 0 }}>Withdraw</h4>
-        <form onSubmit={handlePayout} style={col}>
-          <input type="number" step="0.01" placeholder="Amount" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required style={inp} />
-          <input placeholder="RIB / Wallet Address" value={accountDetails} onChange={(e) => setAccountDetails(e.target.value)} required style={inp} />
-          <button type="submit" style={btn}>Request Payout</button>
-        </form>
-      </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input readOnly value={ADMIN_WALLETS[payNetwork]} style={{ ...inp, flex: 1, fontSize: 12, background: '#edf2f7' }} />
+                <button
+                  type="button"
+Use code with caution.
+onClick={() => { navigator.clipboard.writeText(ADMIN_WALLETS[payNetwork]); setMessage('Wallet Copied!'); }}
+style={btn}
+>
+Copy
 
-      <div style={card}>
-        <h4 style={{ marginTop: 0 }}>My Team ({team.length})</h4>
-        {team.map((t, i) => (
-          <div key={i} style={row}>
-            <span>{t.name}</span>
-            <span>Level {t.depth}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+<input
+placeholder="Transaction Hash (TxID)"
+value={txHash}
+onChange={(e) => setTxHash(e.target.value)}
+required
+style={inp}
+/>
+<button type="submit" disabled={buyingId === selectedProduct.id} style={{ ...btn, background: '#38a169' }}>
+{buyingId === selectedProduct.id ? '...' : 'Confirm Payment'}
+
+
+
+)}
+<h4 style={{ marginTop: 0 }}>Referral Link
+<div style={{ display: 'flex', gap: 8 }}>
+<input readOnly value={refUrl} style={{ ...inp, flex: 1 }} />
+<button onClick={() => { navigator.clipboard.writeText(refUrl); setMessage('Copied!'); }} style={btn}>Copy
+
+<h4 style={{ marginTop: 0 }}>Commissions ({commissions.length})
+{commissions.map((c) => (
+
+Level {c.level} ({Number(c.rate) * 100}%)
+<b style={{ color: '#2f855a' }}>+{c.amount} ({c.status})
+
+))}
+<h4 style={{ marginTop: 0 }}>Withdraw (USDT)
+
+<select value={withdrawNetwork} onChange={(e) => setWithdrawNetwork(e.target.value)} style={inp}>
+USDT - Tron (TRC20)
+USDT - BNB Smart Chain (BEP20)
+
+<input
+type="number"
+step="0.01"
+placeholder="Amount"
+value={withdrawAmount}
+onChange={(e) => setWithdrawAmount(e.target.value)}
+required
+style={inp}
+/>
+<input
+placeholder={withdrawNetwork === 'TRC20' ? 'USDT TRC20 Address (T...)' : 'USDT BEP20 Address (0x...)'}
+value={accountDetails}
+onChange={(e) => setAccountDetails(e.target.value)}
+required
+style={inp}
+/>
+Request Payout
+{payouts.length > 0 && (
+<div style={{ marginTop: 12 }}>
+<small style={{ color: '#666' }}>Payout History ({payouts.length})
+{payouts.map((py) => (
+
+{py.amount} ({py.method})
+{py.status}
+
+))}
+
+)}
+<h4 style={{ marginTop: 0 }}>My Team ({team.length})
+{team.map((t, i) => (
+
+{t.name}
+Level {t.depth}
+
+))}
+
+
+);
 }
-
 const card = { background: '#fff', padding: 16, borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' };
 const col = { display: 'flex', flexDirection: 'column', gap: 12 };
 const row = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #eee' };
 const inp = { padding: 10, borderRadius: 6, border: '1px solid #ccc' };
-const btn = { padding: '10px 14px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 'bold' };
+const btn = { padding: '10px 14px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 'bold', cursor: 'pointer' };
 const linkBtn = { background: 'none', border: 'none', color: '#2b6cb0', marginTop: 12, width: '100%' };
 const msgBox = { padding: 10, background: '#ebf8ff', color: '#2b6cb0', borderRadius: 6, margin: 0 };
