@@ -13,17 +13,24 @@ export default function RootLayout({ children }) {
           .goog-te-banner-frame.skiptranslate,
           .goog-te-gadget-icon,
           #goog-gt-tt,
-          .VIpgJd-ZVi9od-ORHb-OEVmcd,
-          .skiptranslate {
+          .VIpgJd-ZVi9od-ORHb-OEVmcd {
             display: none !important;
           }
           body {
             top: 0px !important;
           }
+          #google_translate_element {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            z-index: 9999;
+            opacity: 0.8;
+          }
         `}</style>
       </head>
       <body>
-        <div id="google_translate_element" style={{ display: 'none' }}></div>
+        {/* زر تغيير اللغة في أسفل الشاشة + التغيير التلقائي */}
+        <div id="google_translate_element"></div>
 
         {children}
 
