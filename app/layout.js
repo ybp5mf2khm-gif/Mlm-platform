@@ -1,4 +1,6 @@
 export const metadata = {
+  import Script from 'next/script';
+
   title: 'منصة التسويق بالعمولة',
   description: 'نظام إدارة الفريق والعمولات والمحفظة',
 };
