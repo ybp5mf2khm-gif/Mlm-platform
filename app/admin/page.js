@@ -69,14 +69,14 @@ export default function AdminPage() {
     loadData();
   }
 
-  if (loading) return <div className="p-10 text-center font-bold">جاري التحميل...</div>;
+  if (loading) return <div style={{ padding: '80px 20px', textAlign: 'center', fontWeight: 'bold' }}>جاري التحميل...</div>;
 
   if (authError) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4 text-center" dir="rtl">
-        <p className="text-red-600 font-bold text-lg mb-4">{authError}</p>
-        <button onClick={() => router.push('/')} className="bg-blue-600 text-white px-6 py-2 rounded-lg">
-          العودة للصفحة الرئيسية وتسجيل الدخول
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', textAlign: 'center' }} dir="rtl">
+        <p style={{ color: '#dc2626', fontWeight: 'bold', marginBottom: '16px' }}>{authError}</p>
+        <button onClick={() => router.push('/')} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px' }}>
+          العودة للصفحة الرئيسية
         </button>
       </div>
     );
@@ -84,29 +84,33 @@ export default function AdminPage() {
 
   const pendingCount = payouts.filter((p) => p.status === 'PENDING').length;
 
-  return (
-    <div className="min-h-screen bg-gray-100 text-right" dir="rtl">
-      <header className="bg-slate-900 text-white p-4 flex justify-between items-center">
-        <h1 className="font-bold text-lg">لوحة تحكم الإدارة</h1>
-        <button onClick={() => router.push('/')} className="text-xs bg-slate-700 px-3 py-1.5 rounded">
-          العودة للرئيسية
-        </button>
-      </header>
+  const getTabStyle = (tabName) => ({
+    padding: '8px 14px',
+    borderRadius: '8px',
+    border: 'none',
+    fontSize: '13px',
+    fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+    backgroundColor: activeTab === tabName ? '#2563eb' : '#ffffff',
+    color: activeTab === tabName ? '#ffffff' : '#374151',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+  });
 
-      <main className="max-w-5xl mx-auto p-4">
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
-          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}>
-            الإحصائيات
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', paddingTop: '75px', paddingBottom: '30px' }} dir="rtl">
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 16px' }}>
+        <div style={{ backgroundColor: '#0f172a', color: '#ffffff', padding: '14px 16px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h1 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>لوحة تحكم الإدارة</h1>
+          <button onClick={() => router.push('/')} style={{ backgroundColor: '#334155', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '12px' }}>
+            العودة للرئيسية
           </button>
-          <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'users' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}>
-            المسوقين ({users.length})
-          </button>
-          <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'orders' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}>
-            الطلبات ({orders.length})
-          </button>
-          <button onClick={() => setActiveTab('payouts')} className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'payouts' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}>
-            السحوبات ({pendingCount})
-          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px' }}>
+          <button onClick={() => setActiveTab('overview')} style={getTabStyle('overview')}>الإحصائيات</button>
+          <button onClick={() => setActiveTab('users')} style={getTabStyle('users')}>المسوقين ({users.length})</button>
+          <button onClick={() => setActiveTab('orders')} style={getTabStyle('orders')}>الطلبات ({orders.length})</button>
+          <button onClick={() => setActiveTab('payouts')} style={getTabStyle('payouts')}>السحوبات ({pendingCount})</button>
         </div>
 
         {activeTab === 'overview' ? (
@@ -122,7 +126,7 @@ export default function AdminPage() {
             onApprovePayout={handleApprovePayout}
           />
         )}
-      </main>
+      </div>
     </div>
   );
 }
