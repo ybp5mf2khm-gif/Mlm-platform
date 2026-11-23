@@ -1,6 +1,5 @@
 'use client';
 
-import AdminTree from '../../components/AdminTree';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
@@ -8,6 +7,7 @@ import AdminStats from '../../components/AdminStats';
 import AdminTables from '../../components/AdminTables';
 import AdminProducts from '../../components/AdminProducts';
 import AdminSettings from '../../components/AdminSettings';
+import AdminTree from '../../components/AdminTree';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -126,6 +126,7 @@ export default function AdminPage() {
           <button onClick={() => setActiveTab('overview')} style={getTabStyle('overview')}>الإحصائيات</button>
           <button onClick={() => setActiveTab('products')} style={getTabStyle('products')}>المنتجات ({products.length})</button>
           <button onClick={() => setActiveTab('users')} style={getTabStyle('users')}>المسوقين ({users.length})</button>
+          <button onClick={() => setActiveTab('tree')} style={getTabStyle('tree')}>شجرة الشبكة</button>
           <button onClick={() => setActiveTab('orders')} style={getTabStyle('orders')}>الطلبات ({orders.length})</button>
           <button onClick={() => setActiveTab('payouts')} style={getTabStyle('payouts')}>السحوبات ({pendingCount})</button>
           <button onClick={() => setActiveTab('settings')} style={getTabStyle('settings')}>الإعدادات</button>
@@ -141,6 +142,10 @@ export default function AdminPage() {
 
         {activeTab === 'settings' && (
           <AdminSettings />
+        )}
+
+        {activeTab === 'tree' && (
+          <AdminTree users={users} />
         )}
 
         {(activeTab === 'users' || activeTab === 'orders' || activeTab === 'payouts') && (
