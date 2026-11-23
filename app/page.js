@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import MemberTree from '../components/MemberTree';
+import ReferralCard from '../components/ReferralCard';
 import MemberStore from '../components/MemberStore';
 import MemberWithdraw from '../components/MemberWithdraw';
 
