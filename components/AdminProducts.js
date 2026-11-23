@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 export default function AdminProducts({ products, onRefresh }) {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [pv, setPv] = useState('');
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
@@ -15,14 +16,13 @@ export default function AdminProducts({ products, onRefresh }) {
     if (!name || !price) return;
     setSaving(true);
 
-    // تجهيز البيانات بناءً على الأعمدة الموجودة في جدولح
     const newProduct = {
       name: name.trim(),
       price: parseFloat(price),
+      pv: parseFloat(pv) || 0,
       sku: 'PRD-' + Date.now(),
     };
 
-    // التحقق من اسم عمود الحالة الموجود في منتجاتك السابقة
     if (products.length > 0 && 'is_active' in products[0]) {
       newProduct.is_active = true;
     } else if (products.length > 0 && 'status' in products[0]) {
@@ -41,6 +41,7 @@ export default function AdminProducts({ products, onRefresh }) {
     setStatusMsg('تمت إضافة المنتج بنجاح!');
     setName('');
     setPrice('');
+    setPv('');
     onRefresh();
   }
 
@@ -111,6 +112,14 @@ export default function AdminProducts({ products, onRefresh }) {
           style={inputStyle}
           required
         />
+        <input
+          type="number"
+          placeholder="نقاط المنتج (PV)"
+          value={pv}
+          onChange={(e) => setPv(e.target.value)}
+          style={inputStyle}
+          required
+        />
         <button
           type="submit"
           disabled={saving}
@@ -135,7 +144,7 @@ export default function AdminProducts({ products, onRefresh }) {
             <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: '13px' }}>
               <th style={{ padding: '12px', textAlign: 'right' }}>المنتج</th>
               <th style={{ padding: '12px', textAlign: 'right' }}>السعر</th>
-              <th style={{ padding: '12px', textAlign: 'right' }}>الحالة</th>
+              <th style={{ padding: '12px', textAlign: 'right' }}>النقاط</th>
               <th style={{ padding: '12px', textAlign: 'right' }}>إجراء</th>
             </tr>
           </thead>
@@ -146,7 +155,7 @@ export default function AdminProducts({ products, onRefresh }) {
                 <tr key={prod.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: '13px' }}>
                   <td style={{ padding: '12px', fontWeight: 'bold' }}>{prod.name}</td>
                   <td style={{ padding: '12px', color: '#15803d', fontWeight: 'bold' }}>{prod.price} MAD</td>
-                  <td style={{ padding: '12px' }}>{active ? 'نشط' : 'مخفي'}</td>
+                  <td style={{ padding: '12px', color: '#2563eb', fontWeight: 'bold' }}>{prod.pv ?? 0} PV</td>
                   <td style={{ padding: '12px' }}>
                     <button
                       onClick={() => toggleProduct(prod)}
