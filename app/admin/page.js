@@ -9,6 +9,7 @@ import AdminTables from '../../components/AdminTables';
 export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -20,7 +21,11 @@ export default function AdminPage() {
 
   async function initAdmin() {
     const { data } = await supabase.auth.getUser();
-    if (!data?.user) return router.push('/login');
+    if (!data?.user) {
+      setAuthError('يجب تسجيل الدخول أولاً من الصفحة الرئيسية');
+      setLoading(false);
+      return;
+    }
 
     const { data: profile } = await supabase
       .from('users')
@@ -28,7 +33,11 @@ export default function AdminPage() {
       .eq('id', data.user.id)
       .single();
 
-    if (profile?.role !== 'ADMIN') return router.push('/dashboard');
+    if (profile?.role !== 'ADMIN') {
+      setAuthError('هذا الحساب ليس لديه صلاحية ADMIN');
+      setLoading(false);
+      return;
+    }
 
     await loadData();
     setLoading(false);
@@ -62,14 +71,25 @@ export default function AdminPage() {
 
   if (loading) return <div className="p-10 text-center font-bold">جاري التحميل...</div>;
 
+  if (authError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4 text-center" dir="rtl">
+        <p className="text-red-600 font-bold text-lg mb-4">{authError}</p>
+        <button onClick={() => router.push('/')} className="bg-blue-600 text-white px-6 py-2 rounded-lg">
+          العودة للصفحة الرئيسية وتسجيل الدخول
+        </button>
+      </div>
+    );
+  }
+
   const pendingCount = payouts.filter((p) => p.status === 'PENDING').length;
 
   return (
     <div className="min-h-screen bg-gray-100 text-right" dir="rtl">
       <header className="bg-slate-900 text-white p-4 flex justify-between items-center">
         <h1 className="font-bold text-lg">لوحة تحكم الإدارة</h1>
-        <button onClick={() => router.push('/dashboard')} className="text-xs bg-slate-700 px-3 py-1.5 rounded">
-          العودة
+        <button onClick={() => router.push('/')} className="text-xs bg-slate-700 px-3 py-1.5 rounded">
+          العودة للرئيسية
         </button>
       </header>
 
