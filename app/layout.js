@@ -13,34 +13,33 @@ export default function RootLayout({ children }) {
           .goog-te-banner-frame.skiptranslate,
           .goog-te-gadget-icon,
           #goog-gt-tt,
-          .VIpgJd-ZVi9od-ORHb-OEVmcd {
+          .VIpgJd-ZVi9od-ORHb-OEVmcd,
+          .skiptranslate {
             display: none !important;
           }
           body {
             top: 0px !important;
           }
-          .skiptranslate {
-            display: none !important;
-          }
         `}</style>
       </head>
       <body>
-        {/* عنصر الترجمة المخفي */}
         <div id="google_translate_element" style={{ display: 'none' }}></div>
 
         {children}
 
-        {/* تهيئة ترجمة جوجل التلقائية حسب لغة الهاتف */}
-        <Script id="google-translate-config" strategy="afterInteractive">
+        <Script id="google-translate-init" strategy="afterInteractive">
           {`
-            function googleTranslateElementInit() {
-              new google.translate.TranslateElement({
+            window.googleTranslateElementInit = function() {
+              new window.google.translate.TranslateElement({
                 pageLanguage: 'en',
                 autoDisplay: false
               }, 'google_translate_element');
 
-              var userLang = (navigator.language || navigator.userLanguage || 'en').split('-')[0];
+              var rawLang = navigator.language || navigator.userLanguage || 'en';
+              var userLang = rawLang.split('-')[0].toLowerCase();
+
               if (userLang && userLang !== 'en') {
+                var attempts = 0;
                 var checkExist = setInterval(function() {
                   var select = document.querySelector('.goog-te-combo');
                   if (select) {
@@ -48,9 +47,11 @@ export default function RootLayout({ children }) {
                     select.dispatchEvent(new Event('change'));
                     clearInterval(checkExist);
                   }
+                  attempts++;
+                  if (attempts > 20) clearInterval(checkExist);
                 }, 500);
               }
-            }
+            };
           `}
         </Script>
         <Script
