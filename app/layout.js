@@ -1,53 +1,63 @@
-export const metadata = {
-  import Script from 'next/script';
+import Script from 'next/script';
 
-  title: 'منصة التسويق بالعمولة',
-  description: 'نظام إدارة الفريق والعمولات والمحفظة',
+export const metadata = {
+  title: 'MLM Platform',
+  description: 'Marketing Platform',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body style={{ fontFamily: 'system-ui, sans-serif', backgroundColor: '#f4f6f8', margin: 0, padding: '16px', color: '#1a202c' }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          {children}
-        </div>
-      </body>
-          <div id="google_translate_element" style={{ display: 'none' }}></div>
-
-<Script id="google-translate-init" strategy="afterInteractive">
-  {`
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        autoDisplay: false
-      }, 'google_translate_element');
-
-      var userLang = (navigator.language || navigator.userLanguage).split('-');
-      if (userLang && userLang !== 'en') {
-        setTimeout(function() {
-          var select = document.querySelector('.goog-te-combo');
-          if (select) {
-            select.value = userLang;
-            select.dispatchEvent(new Event('change'));
+    <html lang="en">
+      <head>
+        <style>{`
+          .goog-te-banner-frame.skiptranslate,
+          .goog-te-gadget-icon,
+          #goog-gt-tt,
+          .VIpgJd-ZVi9od-ORHb-OEVmcd {
+            display: none !important;
           }
-        }, 1000);
-      }
-    }
-  `}
-</Script>
+          body {
+            top: 0px !important;
+          }
+          .skiptranslate {
+            display: none !important;
+          }
+        `}</style>
+      </head>
+      <body>
+        {/* عنصر الترجمة المخفي */}
+        <div id="google_translate_element" style={{ display: 'none' }}></div>
 
-<Script
-  src="https://google.com"
-  strategy="afterInteractive"
-/>
+        {children}
 
-<style>{`
-  .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
-  body { top: 0px !important; }
-  .skiptranslate { display: none !important; }
-`}</style>
+        {/* تهيئة ترجمة جوجل التلقائية حسب لغة الهاتف */}
+        <Script id="google-translate-config" strategy="afterInteractive">
+          {`
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                autoDisplay: false
+              }, 'google_translate_element');
 
+              var userLang = (navigator.language || navigator.userLanguage || 'en').split('-')[0];
+              if (userLang && userLang !== 'en') {
+                var checkExist = setInterval(function() {
+                  var select = document.querySelector('.goog-te-combo');
+                  if (select) {
+                    select.value = userLang;
+                    select.dispatchEvent(new Event('change'));
+                    clearInterval(checkExist);
+                  }
+                }, 500);
+              }
+            }
+          `}
+        </Script>
+        <Script
+          src="https://google.com"
+          strategy="afterInteractive"
+        />
+      </body>
     </html>
   );
 }
