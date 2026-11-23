@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import AdminStats from '../../components/AdminStats';
 import AdminTables from '../../components/AdminTables';
+import AdminProducts from '../../components/AdminProducts';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [payouts, setPayouts] = useState([]);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     initAdmin();
@@ -47,10 +49,12 @@ export default function AdminPage() {
     const u = await supabase.from('users').select('*').order('created_at', { ascending: false });
     const o = await supabase.from('orders').select('*, users(full_name, email)').order('created_at', { ascending: false });
     const p = await supabase.from('withdrawals').select('*, users(full_name, email)').order('created_at', { ascending: false });
+    const prod = await supabase.from('products').select('*').order('created_at', { ascending: false });
 
     if (u.data) setUsers(u.data);
     if (o.data) setOrders(o.data);
     if (p.data) setPayouts(p.data);
+    if (prod.data) setProducts(prod.data);
   }
 
   async function handleToggleUser(id, status) {
@@ -108,14 +112,21 @@ export default function AdminPage() {
 
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px' }}>
           <button onClick={() => setActiveTab('overview')} style={getTabStyle('overview')}>الإحصائيات</button>
+          <button onClick={() => setActiveTab('products')} style={getTabStyle('products')}>المنتجات ({products.length})</button>
           <button onClick={() => setActiveTab('users')} style={getTabStyle('users')}>المسوقين ({users.length})</button>
           <button onClick={() => setActiveTab('orders')} style={getTabStyle('orders')}>الطلبات ({orders.length})</button>
           <button onClick={() => setActiveTab('payouts')} style={getTabStyle('payouts')}>السحوبات ({pendingCount})</button>
         </div>
 
-        {activeTab === 'overview' ? (
+        {activeTab === 'overview' && (
           <AdminStats usersCount={users.length} ordersCount={orders.length} pendingPayouts={pendingCount} />
-        ) : (
+        )}
+
+        {activeTab === 'products' && (
+          <AdminProducts products={products} onRefresh={loadData} />
+        )}
+
+        {(activeTab === 'users' || activeTab === 'orders' || activeTab === 'payouts') && (
           <AdminTables
             activeTab={activeTab}
             users={users}
