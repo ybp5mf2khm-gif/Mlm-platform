@@ -4,15 +4,12 @@ import React from 'react';
 const e = React.createElement;
 
 export default function ReferralCard({ refUrl, referralCode, setMessage }) {
-  function shareOnWhatsApp() {
-    const text =
-      'انضم إلى فريقي الآن وابدأ في تحقيق الأرباح!\n' +
-      'كود الإحالة: ' + (referralCode || '') + '\n' +
-      'سجل من هنا: ' + refUrl;
+  const shareText =
+    'انضم إلى فريقي الآن وابدأ في تحقيق الأرباح!\n' +
+    'كود الإحالة: ' + (referralCode || '') + '\n' +
+    'سجل من هنا: ' + refUrl;
 
-    const waUrl = 'https://wa.me' + encodeURIComponent(text);
-    window.open(waUrl, '_blank');
-  }
+  const waUrl = 'https://whatsapp.com' + encodeURIComponent(shareText);
 
   return e(
     'div',
@@ -48,19 +45,22 @@ export default function ReferralCard({ refUrl, referralCode, setMessage }) {
       )
     ),
     e(
-      'button',
+      'a',
       {
-        type: 'button',
-        onClick: shareOnWhatsApp,
+        href: waUrl,
+        target: '_blank',
+        rel: 'noopener noreferrer',
         style: {
+          display: 'block',
+          textAlign: 'center',
+          textDecoration: 'none',
           width: '100%',
+          boxSizing: 'border-box',
           padding: '10px 14px',
           background: '#25D366',
           color: '#fff',
-          border: 'none',
           borderRadius: 6,
           fontWeight: 'bold',
-          cursor: 'pointer',
           fontSize: 14,
         },
       },
