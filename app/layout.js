@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const DICT = {
   ar: {
@@ -37,34 +37,41 @@ const DICT = {
     APPROVED: 'APPROUVÉ',
     'Order paid! Commission added.': 'Commande payée ! Commission ajoutée.',
   },
-  es: {
+  en: {
     dir: 'ltr',
-    Logout: 'Cerrar sesión',
-    Code: 'Código',
-    Available: 'Disponible',
-    Pending: 'Pendiente',
-    'Products Store': 'Tienda de productos',
-    'Buy Now': 'Comprar ahora',
-    'Referral Link': 'Enlace de referencia',
-    Copy: 'Copiar',
-    Copied: 'Copiado',
-    Commissions: 'Comisiones',
-    Level: 'Nivel',
-    PENDING: 'PENDIENTE',
-    APPROVED: 'APROBADO',
-    'Order paid! Commission added.': '¡Pedido pagado! Comisión añadida.',
+    Logout: 'Logout',
+    Code: 'Code',
+    Available: 'Available',
+    Pending: 'Pending',
+    'Products Store': 'Products Store',
+    'Buy Now': 'Buy Now',
+    'Referral Link': 'Referral Link',
+    Copy: 'Copy',
+    Copied: 'Copied',
+    Commissions: 'Commissions',
+    Level: 'Level',
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    'Order paid! Commission added.': 'Order paid! Commission added.',
   },
 };
 
 export default function RootLayout({ children }) {
+  const [lang, setLang] = useState('en');
+
   useEffect(() => {
-    const rawLang = (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
-    const langDict = DICT[rawLang];
+    const saved = localStorage.getItem('app_lang');
+    const browserLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    const initialLang = saved || (DICT[browserLang] ? browserLang : 'en');
+    setLang(initialLang);
+  }, []);
 
-    if (!langDict) return;
-
+  useEffect(() => {
+    const langDict = DICT[lang] || DICT.en;
     document.documentElement.dir = langDict.dir;
-    document.documentElement.lang = rawLang;
+    document.documentElement.lang = lang;
+
+    if (lang === 'en') return;
 
     const translateDOM = () => {
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -84,16 +91,31 @@ export default function RootLayout({ children }) {
       }
     };
 
-    translateDOM();
+    const timer = setTimeout(translateDOM, 100);
     const observer = new MutationObserver(translateDOM);
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
-    return () => observer.disconnect();
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [lang]);
+
+  const changeLanguage = (newLang) => {
+    localStorage.setItem('app_lang', newLang);
+    window.location.reload();
+  };
 
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang={lang}>
+      <body>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', padding: '8px', background: '#f3f4f6' }}>
+          <button onClick={() => changeLanguage('ar')} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #ccc', background: lang === 'ar' ? '#2563eb' : '#fff', color: lang === 'ar' ? '#fff' : '#000' }}>العربية</button>
+          <button onClick={() => changeLanguage('fr')} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #ccc', background: lang === 'fr' ? '#2563eb' : '#fff', color: lang === 'fr' ? '#fff' : '#000' }}>Français</button>
+          <button onClick={() => changeLanguage('en')} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #ccc', background: lang === 'en' ? '#2563eb' : '#fff', color: lang === 'en' ? '#fff' : '#000' }}>English</button>
+        </div>
+        {children}
+      </body>
     </html>
   );
 }
