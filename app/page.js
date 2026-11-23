@@ -162,7 +162,7 @@ export default function Home() {
       e('div', { style: card }, e('small', null, 'Pending'), e('h2', { style: { margin: '5px 0', color: '#d69e2e' } }, wallet?.pending_balance || '0.00'))
     ),
     e('div', { style: card },
-    e('h4', { style: { marginTop: 0 } }, 'Products Store (USDT) - Min: 100'),
+    e('h4', { style: { marginTop: 0 } }, 'Products Store'),
 
 
       products.map((p) => e('div', { key: p.id, style: row },
