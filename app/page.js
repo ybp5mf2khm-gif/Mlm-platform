@@ -283,7 +283,6 @@ export default function Home() {
               </div>
 
               <input
-Use code with caution.
 placeholder="Transaction Hash (TxID)"
 value={txHash}
 onChange={(e) => setTxHash(e.target.value)}
