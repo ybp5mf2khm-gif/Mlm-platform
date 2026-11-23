@@ -190,7 +190,7 @@ export default function Home() {
     e('div', { style: card }, e('h4', { style: { marginTop: 0 } }, 'Referral Link'), e('div', { style: { display: 'flex', gap: 8 } }, e('input', { readOnly: true, value: refUrl, style: { ...inp, flex: 1 } }), e('button', { onClick: () => { navigator.clipboard.writeText(refUrl); setMessage('Copied!'); }, style: btn }, 'Copy'))),
     e('div', { style: card }, e('h4', { style: { marginTop: 0 } }, 'Commissions (' + commissions.length + ')'), commissions.map((c) => e('div', { key: c.id, style: row }, e('span', null, 'Level ' + c.level + ' (' + (Number(c.rate) * 100) + '%)'), e('b', { style: { color: '#2f855a' } }, '+' + c.amount + ' (' + c.status + ')')))),
     e('div', { style: card },
-      e('h4', { style: { marginTop: 0 } }, 'Withdraw (USDT)'),
+      e('h4', { style: { marginTop: 0 } }, ' Withdraw (USDT) - Min: 100'),
       e('form', { onSubmit: handlePayout, style: col },
         e('select', { value: withdrawNetwork, onChange: (ev) => setWithdrawNetwork(ev.target.value), style: inp }, e('option', { value: 'TRC20' }, 'USDT - Tron (TRC20)'), e('option', { value: 'BEP20' }, 'USDT - BNB Smart Chain (BEP20)')),
 e('input', { type: 'number', step: '0.01', min: 100, placeholder: 'Amount (Min: 100)', value: withdrawAmount, onChange: (ev) => setWithdrawAmount(ev.target.value), required: true, style: inp }),
