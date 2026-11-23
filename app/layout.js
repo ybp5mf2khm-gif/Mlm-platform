@@ -108,28 +108,61 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang={lang}>
-      <body>
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px', background: '#f3f4f6' }}>
-          <select
-            value={lang}
-            onChange={(e) => changeLanguage(e.target.value)}
-            aria-label="Language"
+      <body style={{ margin: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            padding: '12px 16px 0',
+          }}
+        >
+          <div
             style={{
+              position: 'relative',
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid #e5e7eb',
+              borderRadius: '9999px',
               padding: '6px 14px',
-              borderRadius: '8px',
-              border: '1px solid #d1d5db',
-              background: '#ffffff',
-              color: '#111827',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              outline: 'none',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
             }}
           >
-            <option value="ar">🌐 العربية</option>
-            <option value="fr">🌐 Français</option>
-            <option value="en">🌐 English</option>
-          </select>
+            <span style={{ fontSize: '15px', marginInlineEnd: '6px' }}>🌐</span>
+            <select
+              value={lang}
+              onChange={(e) => changeLanguage(e.target.value)}
+              aria-label="Language"
+              style={{
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                background: 'transparent',
+                border: 'none',
+                color: '#1f2937',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                outline: 'none',
+                paddingInlineEnd: '14px',
+              }}
+            >
+              <option value="ar">العربية</option>
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+            </select>
+            <span
+              style={{
+                position: 'absolute',
+                insetInlineEnd: '12px',
+                fontSize: '10px',
+                color: '#6b7280',
+                pointerEvents: 'none',
+              }}
+            >
+              ▼
+            </span>
+          </div>
         </div>
         {children}
       </body>
