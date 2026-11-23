@@ -1,11 +1,11 @@
+jsx
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-// ضع عناوين محافظك لاستلام المدفوعات هنا:
 const ADMIN_WALLETS = {
-  TRC20: 'ضع_عنوان_محفظتك_TRC20_هنا',
-  BEP20: 'ضع_عنوان_محفظتك_BEP20_هنا',
+  TRC20: 'PUT_YOUR_TRC20_WALLET_HERE',
+  BEP20: 'PUT_YOUR_BEP20_WALLET_HERE',
 };
 
 export default function Home() {
@@ -26,12 +26,10 @@ export default function Home() {
   const [sponsorCode, setSponsorCode] = useState('');
   const [message, setMessage] = useState('');
 
-  // حالات السحب بالـ USDT
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawNetwork, setWithdrawNetwork] = useState('TRC20');
   const [accountDetails, setAccountDetails] = useState('');
 
-  // حالات الدفع بالـ USDT عند الشراء
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [payNetwork, setPayNetwork] = useState('TRC20');
   const [txHash, setTxHash] = useState('');
@@ -93,7 +91,6 @@ export default function Home() {
       .order('created_at', { ascending: false });
     if (cm) setCommissions(cm);
 
-    // جلب سجل السحوبات إن وجد
     const { data: py } = await supabase
       .from('payouts')
       .select('*')
@@ -102,7 +99,6 @@ export default function Home() {
     if (py) setPayouts(py);
   }
 
-  // تأكيد الدفع بالـ USDT وإنشاء الطلب
   async function confirmUsdtOrder(e) {
     e.preventDefault();
     if (!selectedProduct || buyingId) return;
@@ -115,7 +111,7 @@ export default function Home() {
         buyer_id: user.id,
         total_amount: selectedProduct.price,
         total_pv: selectedProduct.pv,
-        status: 'PENDING', // ينتظر تأكيدك بعد مراجعة التحويل
+        status: 'PENDING',
       })
       .select()
       .single();
@@ -168,8 +164,6 @@ export default function Home() {
   async function handlePayout(e) {
     e.preventDefault();
     const trimmedWallet = accountDetails.trim();
-
-    // التحقق من صحة عنوان محفظة USDT
     const isValidTRC20 = withdrawNetwork === 'TRC20' && /^T[a-zA-Z0-9]{33}$/.test(trimmedWallet);
     const isValidBEP20 = withdrawNetwork === 'BEP20' && /^0x[a-fA-F0-9]{40}$/.test(trimmedWallet);
 
@@ -265,12 +259,11 @@ export default function Home() {
           </div>
         ))}
 
-        {/* نافذة الدفع بالـ USDT عند اختيار منتج */}
         {selectedProduct && (
           <div style={{ marginTop: 14, padding: 14, background: '#f7fafc', borderRadius: 8, border: '1px solid #cbd5e0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <b>Pay with USDT: {selectedProduct.name}</b>
-              <button onClick={() => setSelectedProduct(null)} style={{ background: 'none', border: 'none', color: '#e53e3e', fontWeight: 'bold', cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setSelectedProduct(null)} style={{ background: 'none', border: 'none', color: '#e53e3e', fontWeight: 'bold', cursor: 'pointer' }}>X</button>
             </div>
 
             <form onSubmit={confirmUsdtOrder} style={col}>
@@ -283,12 +276,15 @@ export default function Home() {
                 <input readOnly value={ADMIN_WALLETS[payNetwork]} style={{ ...inp, flex: 1, fontSize: 12, background: '#edf2f7' }} />
                 <button
                   type="button"
-onClick={() => { navigator.clipboard.writeText(ADMIN_WALLETS[payNetwork]); setMessage('Wallet Copied!'); }}
-style={btn}
->
-Copy
+                  onClick={() => { navigator.clipboard.writeText(ADMIN_WALLETS[payNetwork]); setMessage('Wallet Copied!'); }}
+                  style={btn}
+                >
+                  Copy
+                </button>
+              </div>
 
-<input
+              <input
+Use code with caution.
 placeholder="Transaction Hash (TxID)"
 value={txHash}
 onChange={(e) => setTxHash(e.target.value)}
