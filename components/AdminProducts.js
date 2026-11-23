@@ -19,6 +19,10 @@ export default function AdminProducts({ products, onRefresh }) {
     const newProduct = {
       name: name.trim(),
       price: parseFloat(price),
+          const newProduct = {
+      name: name.trim(),
+      price: parseFloat(price),
+      sku: 'PRD-' + Date.now(),
     };
 
     // التحقق من اسم عمود الحالة الموجود في منتجاتك السابقة
