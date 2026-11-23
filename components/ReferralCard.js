@@ -5,11 +5,29 @@ const e = React.createElement;
 
 export default function ReferralCard({ refUrl, referralCode, setMessage }) {
   const shareText =
-    'انضم إلى فريقي الآن وابدأ في تحقيق الأرباح!\n' +
-    'كود الإحالة: ' + (referralCode || '') + '\n' +
-    'سجل من هنا: ' + refUrl;
+    'Join my team now! Referral Code: ' +
+    (referralCode || '') +
+    ' - Register here: ' +
+    refUrl;
 
-  const waUrl = 'https://whatsapp.com' + encodeURIComponent(shareText);
+  const waUrl = 'https://wa.me' + encodeURIComponent(shareText);
+
+  async function handleShare(ev) {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      ev.preventDefault();
+      try {
+        await navigator.share({
+          title: 'Join My Team',
+          text: 'Join my team now! Referral Code: ' + (referralCode || ''),
+          url: refUrl,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          window.location.href = waUrl;
+        }
+      }
+    }
+  }
 
   return e(
     'div',
@@ -48,8 +66,7 @@ export default function ReferralCard({ refUrl, referralCode, setMessage }) {
       'a',
       {
         href: waUrl,
-        target: '_blank',
-        rel: 'noopener noreferrer',
+        onClick: handleShare,
         style: {
           display: 'block',
           textAlign: 'center',
