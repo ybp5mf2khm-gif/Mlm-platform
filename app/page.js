@@ -283,7 +283,6 @@ export default function Home() {
                 <input readOnly value={ADMIN_WALLETS[payNetwork]} style={{ ...inp, flex: 1, fontSize: 12, background: '#edf2f7' }} />
                 <button
                   type="button"
-Use code with caution.
 onClick={() => { navigator.clipboard.writeText(ADMIN_WALLETS[payNetwork]); setMessage('Wallet Copied!'); }}
 style={btn}
 >
