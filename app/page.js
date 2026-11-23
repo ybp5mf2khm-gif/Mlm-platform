@@ -83,9 +83,15 @@ export default function Home() {
     if (!selectedProduct || buyingId) return;
     setBuyingId(selectedProduct.id);
     setMessage('Processing...');
-    const { data: ord, error: err } = await supabase.from('orders').insert({
-      buyer_id: user.id, total_amount: selectedProduct.price, total_pv: selectedProduct.pv, status: 'PENDING'
+        const { data: ord, error: err } = await supabase.from('orders').insert({
+      buyer_id: user.id,
+      total_amount: selectedProduct.price,
+      total_pv: selectedProduct.pv,
+      status: 'PENDING',
+      tx_hash: txHash.trim(),
+      network: payNetwork
     }).select().single();
+
     if (err) { setMessage('Error: ' + err.message); setBuyingId(null); return; }
     await supabase.from('order_items').insert({
       order_id: ord.id, product_id: selectedProduct.id, quantity: 1, unit_price: selectedProduct.price, unit_pv: selectedProduct.pv
