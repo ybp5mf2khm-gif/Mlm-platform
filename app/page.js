@@ -95,19 +95,29 @@ export default function Home() {
     }
   }
 
-  async function handlePayout(ev) {
+    async function handlePayout(ev) {
     ev.preventDefault();
+    const minWithdraw = 100;
+    const numAmount = parseFloat(withdrawAmount);
+
+    if (isNaN(numAmount) || numAmount < minWithdraw) {
+      setMessage('Error: Minimum withdrawal is ' + minWithdraw);
+      return;
+    }
+
     const trimmedWallet = accountDetails.trim();
     const isValidTRC20 = withdrawNetwork === 'TRC20' && /^T[a-zA-Z0-9]{33}$/.test(trimmedWallet);
     const isValidBEP20 = withdrawNetwork === 'BEP20' && /^0x[a-fA-F0-9]{40}$/.test(trimmedWallet);
     if (!isValidTRC20 && !isValidBEP20) { setMessage('Error: Invalid ' + withdrawNetwork + ' wallet address'); return; }
+
     setMessage('Sending request...');
     const { error } = await supabase.rpc('request_payout', {
-      p_user_id: user.id, p_amount: parseFloat(withdrawAmount), p_method: 'USDT (' + withdrawNetwork + ')', p_account_info: { network: withdrawNetwork, wallet: trimmedWallet }
+      p_user_id: user.id, p_amount: numAmount, p_method: 'USDT (' + withdrawNetwork + ')', p_account_info: { network: withdrawNetwork, wallet: trimmedWallet }
     });
     if (error) setMessage('Error: ' + error.message);
     else { setMessage('Payout requested!'); setWithdrawAmount(''); setAccountDetails(''); await loadData(user.id); }
   }
+
 
   async function logout() { await supabase.auth.signOut(); setUser(null); setProfile(null); }
   if (loading) return e('p', { style: { textAlign: 'center', marginTop: 40 } }, 'Loading...');
