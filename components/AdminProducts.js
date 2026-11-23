@@ -13,6 +13,27 @@ export default function AdminProducts({ products, onRefresh }) {
     if (!name || !price) return;
     setSaving(true);
 
+    const { error } = await supabase.from('products').insert([
+      { name, price: parseFloat(price), is_active: true }
+    ]);
+
+    setSaving(false);
+
+    if (error) {
+      alert('خطأ في الحفظ: ' + error.message);
+      return;
+    }
+
+    setName('');
+    setPrice('');
+    onRefresh();
+  }
+
+  async function handleAddProduct(e) {
+    e.preventDefault();
+    if (!name || !price) return;
+    setSaving(true);
+
     await supabase.from('products').insert([
       { name, price: parseFloat(price), is_active: true }
     ]);
