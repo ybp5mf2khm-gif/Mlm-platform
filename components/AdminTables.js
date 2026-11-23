@@ -9,31 +9,42 @@ export default function AdminTables({
   onApproveOrder,
   onApprovePayout,
 }) {
+  const boxStyle = {
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+    overflowX: 'auto',
+    border: '1px solid #e5e7eb',
+  };
+
+  const thStyle = { padding: '12px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: '13px', textAlign: 'right' };
+  const tdStyle = { padding: '12px', borderBottom: '1px solid #f1f5f9', fontSize: '13px' };
+
   if (activeTab === 'users') {
     return (
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full text-sm text-right">
-          <thead className="bg-gray-50 text-gray-700 border-b">
+      <div style={boxStyle}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
             <tr>
-              <th className="p-3">الاسم</th>
-              <th className="p-3">الكود</th>
-              <th className="p-3">الحالة</th>
-              <th className="p-3">إجراء</th>
+              <th style={thStyle}>الاسم</th>
+              <th style={thStyle}>الكود</th>
+              <th style={thStyle}>الحالة</th>
+              <th style={thStyle}>إجراء</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b">
-                <td className="p-3 font-medium">
-                  {u.full_name}
-                  <span className="block text-xs text-gray-400">{u.email}</span>
+              <tr key={u.id}>
+                <td style={tdStyle}>
+                  <div style={{ fontWeight: 'bold' }}>{u.full_name}</div>
+                  <div style={{ fontSize: '11px', color: '#64748b' }}>{u.email}</div>
                 </td>
-                <td className="p-3 font-mono text-blue-600">{u.referral_code}</td>
-                <td className="p-3">{u.status}</td>
-                <td className="p-3">
+                <td style={{ ...tdStyle, color: '#2563eb', fontFamily: 'monospace' }}>{u.referral_code}</td>
+                <td style={tdStyle}>{u.status}</td>
+                <td style={tdStyle}>
                   <button
                     onClick={() => onToggleUser(u.id, u.status)}
-                    className="text-xs bg-slate-800 text-white px-3 py-1 rounded"
+                    style={{ backgroundColor: '#1e293b', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '12px' }}
                   >
                     {u.status === 'ACTIVE' ? 'إيقاف' : 'تفعيل'}
                   </button>
@@ -48,27 +59,27 @@ export default function AdminTables({
 
   if (activeTab === 'orders') {
     return (
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full text-sm text-right">
-          <thead className="bg-gray-50 text-gray-700 border-b">
+      <div style={boxStyle}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
             <tr>
-              <th className="p-3">المسوق</th>
-              <th className="p-3">المبلغ</th>
-              <th className="p-3">الحالة</th>
-              <th className="p-3">إجراء</th>
+              <th style={thStyle}>المسوق</th>
+              <th style={thStyle}>المبلغ</th>
+              <th style={thStyle}>الحالة</th>
+              <th style={thStyle}>إجراء</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order.id} className="border-b">
-                <td className="p-3">{order.users?.full_name || 'غير معروف'}</td>
-                <td className="p-3 font-bold">${order.total_amount}</td>
-                <td className="p-3">{order.status}</td>
-                <td className="p-3">
+              <tr key={order.id}>
+                <td style={tdStyle}>{order.users?.full_name || 'غير معروف'}</td>
+                <td style={{ ...tdStyle, fontWeight: 'bold' }}>{order.total_amount} MAD</td>
+                <td style={tdStyle}>{order.status}</td>
+                <td style={tdStyle}>
                   {order.status !== 'PAID' && (
                     <button
                       onClick={() => onApproveOrder(order.id)}
-                      className="text-xs bg-green-600 text-white px-3 py-1 rounded"
+                      style={{ backgroundColor: '#16a34a', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '12px' }}
                     >
                       تأكيد الدفع
                     </button>
@@ -84,27 +95,27 @@ export default function AdminTables({
 
   if (activeTab === 'payouts') {
     return (
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full text-sm text-right">
-          <thead className="bg-gray-50 text-gray-700 border-b">
+      <div style={boxStyle}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
             <tr>
-              <th className="p-3">المسوق</th>
-              <th className="p-3">المبلغ</th>
-              <th className="p-3">الحالة</th>
-              <th className="p-3">إجراء</th>
+              <th style={thStyle}>المسوق</th>
+              <th style={thStyle}>المبلغ</th>
+              <th style={thStyle}>الحالة</th>
+              <th style={thStyle}>إجراء</th>
             </tr>
           </thead>
           <tbody>
             {payouts.map((p) => (
-              <tr key={p.id} className="border-b">
-                <td className="p-3">{p.users?.full_name}</td>
-                <td className="p-3 font-bold text-green-700">${p.amount}</td>
-                <td className="p-3">{p.status}</td>
-                <td className="p-3">
+              <tr key={p.id}>
+                <td style={tdStyle}>{p.users?.full_name}</td>
+                <td style={{ ...tdStyle, fontWeight: 'bold', color: '#15803d' }}>{p.amount} MAD</td>
+                <td style={tdStyle}>{p.status}</td>
+                <td style={tdStyle}>
                   {p.status === 'PENDING' && (
                     <button
                       onClick={() => onApprovePayout(p.id)}
-                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded"
+                      style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '12px' }}
                     >
                       موافقة
                     </button>
