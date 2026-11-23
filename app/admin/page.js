@@ -74,13 +74,18 @@ export default function AdminPage() {
       e('button', { onClick: loadAll, style: btn }, 'Refresh')
     ),
     msg ? e('p', { style: msgBox }, msg) : null,
-    e('div', { style: card },
+        e('div', { style: card },
       e('h4', { style: { marginTop: 0 } }, 'Orders (' + orders.length + ')'),
       orders.map((o) => e('div', { key: o.id, style: row },
-        e('div', null, e('b', null, o.total_amount + ' MAD | ' + o.total_pv + ' PV'), e('div', { style: { fontSize: 12, color: '#666' } }, 'Status: ' + o.status)),
+        e('div', { style: { flex: 1 } },
+          e('b', null, o.total_amount + ' MAD | ' + o.total_pv + ' PV'),
+          o.tx_hash ? e('div', { style: { fontSize: 11, color: '#2b6cb0', wordBreak: 'break-all' } }, 'TxID (' + (o.network || 'USDT') + '): ' + o.tx_hash) : null,
+          e('div', { style: { fontSize: 12, color: '#666' } }, 'Status: ' + o.status)
+        ),
         o.status === 'PENDING' ? e('button', { onClick: () => approveOrder(o.id), style: { ...btn, background: '#38a169' } }, 'Approve') : e('b', { style: { color: '#38a169' } }, 'PAID')
       ))
     ),
+
     e('div', { style: card },
       e('h4', { style: { marginTop: 0 } }, 'USDT Withdrawals (' + payouts.length + ')'),
       payouts.map((p) => e('div', { key: p.id, style: row },
