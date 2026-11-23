@@ -1,5 +1,6 @@
 'use client';
 
+import AdminTree from '../../components/AdminTree';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
